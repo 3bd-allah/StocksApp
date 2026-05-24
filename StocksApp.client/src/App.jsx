@@ -1,14 +1,20 @@
 import './App.css'
-import { useLoaderData } from 'react-router'
+import { Link, Outlet, useLoaderData } from 'react-router'
+import { Suspense } from 'react';
+import { lazy } from 'react';
+const CompanyProfile = lazy(()=> import('./components/CompanyProfile'))
+
 
 function App() {
-  const {stockSymbol, stockName, price, quantity} = useLoaderData(); 
+  
   return (
     <>
-      <section id="center">
-        <h4>{stockName} ( <span>{stockSymbol}</span> )</h4>
-        <p>$ {price}</p>
+      <section >
+          <Link to='/company' relative='route'>
+            To Company
+          </Link>
       </section>
+      <Outlet />
     </>
   )
 }
@@ -16,7 +22,5 @@ function App() {
 export default App
 
 
-export const loader = async ()=>{
- const response  = await fetch("http://localhost:5000/company-profile")
- return await response.json();
-}
+
+

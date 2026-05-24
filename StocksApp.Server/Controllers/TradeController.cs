@@ -13,11 +13,12 @@ namespace StocksApp.Server.Controllers
         {
             var profileRes = await finnhub.GetCompanyProfileAsync(finnhubOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
             var stockRes = await finnhub.GetStockPriceQuoteAsync(finnhubOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
+
             return Json(new StockTradeDTO
             {
                 StockName = profileRes["name"]?.ToString(),
-                StockSymbol = profileRes["ticker"].ToString(),
-                Price = Convert.ToDouble(stockRes["h"].ToString())
+                StockSymbol = profileRes["ticker"]?.ToString() ,
+                Price = Convert.ToDouble(stockRes["h"]?.ToString()) 
             });
         }
 
