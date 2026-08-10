@@ -1,17 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Formats.Asn1;
 
 namespace StocksApp.Server.Entities
 {
-    public class SellOrders
+    public class BuyOrder
     {
         [Key]
         [Required(ErrorMessage = "Buy order ID is required.")]
-        public Guid SellOrderID { get; set; }
-
+        public Guid BuyOrderID { get; set; }
 
         [Required(ErrorMessage = "Stock symbol is required.")]
-        public string? StcokSymbol { get; set; }
-
+        public string? StockSymbol { get; set; }
 
         [Required(ErrorMessage = "Stock name is required.")]
         public string? StockName { get; set; }

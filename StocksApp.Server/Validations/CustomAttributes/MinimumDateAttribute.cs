@@ -27,8 +27,6 @@ namespace StocksApp.Server.Validations.CustomAttributes
             {
                 return null;
             }
-
-            
         }
     }
 }

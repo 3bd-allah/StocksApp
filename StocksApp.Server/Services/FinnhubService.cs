@@ -1,5 +1,5 @@
-﻿using StocksApp.Server.Services.Contracts;
-
+﻿using StocksApp.Server.DTOs;
+using StocksApp.Server.Services.Contracts;
 using System.Text.Json;
 
 namespace StocksApp.Server.Services
@@ -14,36 +14,40 @@ namespace StocksApp.Server.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        private string Token { get => _configuration.GetValue<string>("FinnhubToken"); }
+        private string Token { get => _configuration.GetValue<string>("FinnhubToken")!; }
 
-        private async Task<Dictionary<string, object?>> GetFrom(string link)
+        private async Task<T> GetFrom<T>(string link)
         {
             using (var httpClient = _httpClientFactory.CreateClient())
             {
                 HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(link);
 
+                
                 Stream stream = await httpResponseMessage.Content.ReadAsStreamAsync();
 
                 StreamReader streamReader = new StreamReader(stream);
-                string response = streamReader.ReadToEnd();
+                string response = await streamReader.ReadToEndAsync();
 
-                Dictionary<string, object?>? responseDicitonary = JsonSerializer.Deserialize<Dictionary<string, object>>(response);
+                T? responseDicitonary = JsonSerializer.Deserialize<T>(response, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                })!;
 
                 return responseDicitonary;
             }
         }
-        public async Task<Dictionary<string, object?>> GetCompanyProfileAsync(string symbol)
+        public async Task<TradeCompanyProfile> GetCompanyProfileAsync(string symbol)
         {
             
             string link = $"https://finnhub.io/api/v1/stock/profile2?symbol={symbol}&token={Token}";
-            return await GetFrom(link); ;
+            return await GetFrom<TradeCompanyProfile>(link) ;
         }
 
         public async Task<Dictionary<string, object?>> GetStockPriceQuoteAsync(string symbol)
         {
             
             string link = $"https://finnhub.io/api/v1/quote?symbol={symbol}&token={Token}";
-            return await GetFrom(link); ;
+            return await GetFrom<Dictionary<string, object?>>(link); 
         }
     }
 }

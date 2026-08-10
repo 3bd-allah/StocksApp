@@ -1,26 +1,13 @@
-import './App.css'
-import { Link, Outlet, useLoaderData } from 'react-router'
-import { Suspense } from 'react';
-import { lazy } from 'react';
-const CompanyProfile = lazy(()=> import('./components/CompanyProfile'))
-
+import { Outlet } from "react-router";
+import Navbar from "./components/Navbar";
 
 function App() {
-  
   return (
     <>
-      <section >
-          <Link to='/company' relative='route'>
-            To Company
-          </Link>
-      </section>
+      <Navbar />
       <Outlet />
     </>
-  )
+  );
 }
 
-export default App
-
-
-
-
+export default App;

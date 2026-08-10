@@ -7,7 +7,7 @@ namespace StocksApp.Server.DTOs
     public class BuyOrderRequest
     {
         [Required(ErrorMessage = "Stock symbol is required.")]
-        public string? StcokSymbol { get; set; }
+        public string? StockSymbol { get; set; }
 
 
         [Required(ErrorMessage = "Stock name is required.")]
@@ -15,7 +15,7 @@ namespace StocksApp.Server.DTOs
 
 
         [MinimumDate("01-01-2000")]
-        public DateTime DateAndTimeOfOrder { get; set; }
+        public DateTime DateAndTimeOfOrder { get; set; } = DateTime.UtcNow;
 
 
         [Range(1, 100000, ErrorMessage = "Quantity must be between 1 and 100,000.")]
@@ -25,11 +25,11 @@ namespace StocksApp.Server.DTOs
         [Range(1d, 10000d, ErrorMessage = "Price must be between 1 and 10,000.")]
         public double? Price { get; set; }
 
-        public BuyOrders ToBuyOrder()
+        public BuyOrder ToBuyOrder()
         {
-            return new BuyOrders
+            return new BuyOrder
             {
-                StcokSymbol = this.StcokSymbol,
+                StockSymbol = this.StockSymbol,
                 StockName = this.StockName,
                 DateAndTimeOfOrder = this.DateAndTimeOfOrder,
                 Quantity = this.Quantity,

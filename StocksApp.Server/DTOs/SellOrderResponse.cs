@@ -9,7 +9,7 @@ namespace StocksApp.Server.DTOs
         public Guid SellOrderID { get; set; }
 
         [Required(ErrorMessage = "Stock symbol is required.")]
-        public string? StcokSymbol { get; set; }
+        public string? StockSymbol { get; set; }
 
         [Required(ErrorMessage = "Stock name is required.")]
         public string? StockName { get; set; }
@@ -29,13 +29,13 @@ namespace StocksApp.Server.DTOs
     }
     public static class SellOrderExtenstions
     {
-        public static SellOrderResponse ToSellOrderResponse(this SellOrders sellOrder)
+        public static SellOrderResponse ToSellOrderResponse(this SellOrder sellOrder)
         {
             return new SellOrderResponse
             {
                 SellOrderID = sellOrder.SellOrderID,
                 StockName = sellOrder.StockName,
-                StcokSymbol = sellOrder.StcokSymbol,
+                StockSymbol = sellOrder.StockSymbol,
                 Quantity = sellOrder.Quantity,
                 Price = sellOrder.Price,
                 DateAndTimeOfOrder = sellOrder.DateAndTimeOfOrder,

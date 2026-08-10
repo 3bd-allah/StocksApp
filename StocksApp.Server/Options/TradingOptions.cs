@@ -1,7 +1,8 @@
 ﻿namespace StocksApp.Server.Options
 {
-    public class FinnhubSymbolOptions
+    public class TradingOptions
     {
         public string? DefaultFinnhubSymbol { get; set; }
+        public uint DefaultTradingQuantity { get; set; }
     }
 }

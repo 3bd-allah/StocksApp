@@ -5,23 +5,61 @@ using StocksApp.Server.Services.Contracts;
 using StocksApp.Server.DTOs;
 namespace StocksApp.Server.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    public class TradeController(IFinnhubService finnhub, IOptions<FinnhubSymbolOptions> finnhubOptions) : Controller
+    public class TradeController(
+        IFinnhubService _finnhubService,
+        IStockService _stockService,
+        IOrdersPdfGenerator _ordersPdfGenerator,
+        IOptionsSnapshot<TradingOptions> tradingOptions) : ControllerBase
     {
-        [Route("/company-profile")]
-        public async Task<IActionResult> CompanyProfile()
+        [HttpGet("company-profile")]
+        public async Task<ActionResult<StockTradeDTO>> CompanyProfile()
         {
-            var profileRes = await finnhub.GetCompanyProfileAsync(finnhubOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
-            var stockRes = await finnhub.GetStockPriceQuoteAsync(finnhubOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
+            var profileRes = await _finnhubService.GetCompanyProfileAsync(tradingOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
+            var stockRes = await _finnhubService.GetStockPriceQuoteAsync(tradingOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
 
-            return Json(new StockTradeDTO
+            return Ok(new StockTradeDTO
             {
-                StockName = profileRes["name"]?.ToString(),
-                StockSymbol = profileRes["ticker"]?.ToString() ,
-                Price = Convert.ToDouble(stockRes["h"]?.ToString()) 
+                StockName = profileRes.Ticker,
+                StockSymbol = profileRes.Name,
+                Price = Convert.ToDouble(stockRes["h"]?.ToString()),
+                Quantity = tradingOptions.Value.DefaultTradingQuantity 
             });
         }
 
+        [HttpPost("buyOrder")]
+        public async Task<ActionResult<BuyOrderResponse>> BuyOrder([FromBody] BuyOrderRequest buyOrderRequest)
+        {
+            // Implementation for buying orders
+            BuyOrderResponse buyOrderResponse = await _stockService.CreateBuyOrder(buyOrderRequest);
+            return Ok(buyOrderResponse);
+        }
 
+        [HttpPost("sellOrder")]
+        public async Task<ActionResult<SellOrderResponse>> SellOrder([FromBody] SellOrderRequest sellOrderRequest)
+        {
+            // Implementation for selling orders
+
+            SellOrderResponse sellOrderResponse = await _stockService.CreateSellOrder(sellOrderRequest);
+            return Ok(sellOrderResponse);
+        }
+
+        [HttpGet("orders")]
+        public async Task<IActionResult> Orders()
+        {
+            // Implementation for retrieving orders
+            var buyOrders = await _stockService.GetAllBuyOrders();
+            var sellOrders = await _stockService.GetAllSellOrders();
+            return Ok(new { BuyOrders = buyOrders, SellOrders = sellOrders });
+        }
+
+        [HttpGet("orders-pdf")]
+        public async Task<IActionResult> OrdersPDF()
+        {
+            // Implementation for retrieving orders
+            var pdfBytes = await _ordersPdfGenerator.GenerateOrdersPdfAsync();
+            return File(pdfBytes, "application/pdf", "orders.pdf");
+        }
     }
 }

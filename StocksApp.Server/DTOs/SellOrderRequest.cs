@@ -7,14 +7,14 @@ namespace StocksApp.Server.DTOs
     {
 
         [Required(ErrorMessage = "Stock symbol is required.")]
-        public string? StcokSymbol { get; set; }
+        public string? StockSymbol { get; set; }
 
         [Required(ErrorMessage = "Stock name is required.")]
         public string? StockName { get; set; }
 
 
         [DataType(DataType.Date)]
-        public DateTime DateAndTimeOfOrder { get; set; }
+        public DateTime DateAndTimeOfOrder { get; set; } = DateTime.UtcNow; 
 
 
         [Range(1, 100000, ErrorMessage = "Quantity must be between 1 and 100,000.")]
@@ -25,11 +25,11 @@ namespace StocksApp.Server.DTOs
         public double? Price { get; set; }
 
 
-        public SellOrders ToSellOrder()
+        public SellOrder ToSellOrder()
         {
-            return new SellOrders
+            return new SellOrder
             {
-                StcokSymbol = this.StcokSymbol,
+                StockSymbol = this.StockSymbol,
                 StockName = this.StockName,
                 Quantity = this.Quantity,
                 Price = this.Price,

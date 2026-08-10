@@ -1,24 +1,28 @@
-﻿using StocksApp.Server.DTOs;
+﻿using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using StocksApp.Server.DTOs;
 using StocksApp.Server.Entities;
+using StocksApp.Server.IRepository;
 using StocksApp.Server.Services.Contracts;
 using StocksApp.Server.Validations.Helpers;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 namespace StocksApp.Server.Services
 {
     public class StockService : IStockService
     {
-        private readonly List<BuyOrders> _buyOrders;
-        private readonly List<SellOrders> _sellOrders;
+        private readonly IStockRepository _stockRepository;
 
-        public StockService()
+        public StockService(IStockRepository stockRepository)
         {
-            _buyOrders = new List<BuyOrders>();
-            _sellOrders = new List<SellOrders>();
+            _stockRepository = stockRepository;
+
         }
 
         private async Task<TResponse> CreateOrder<TRequest, TEntity, TResponse>(
             TRequest? request,
-            Func<TRequest, Guid, TEntity> entityFactory,
+            Func<TRequest, Guid, Task<TEntity>> entityFactory,
             Func<TEntity, TResponse> ToMapResponse
             ) where TRequest : class
         {
@@ -26,36 +30,36 @@ namespace StocksApp.Server.Services
 
             ValidationHelper.ModelValidation(request);
 
-            Guid newID = Guid.NewGuid();
+            Guid newID = Guid.CreateVersion7();
 
-            TEntity newOrder = entityFactory(request, newID);
+            TEntity newOrder = await entityFactory(request, newID);
 
 
             return ToMapResponse(newOrder);
         }
         public async Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? request)
         {
-          return await CreateOrder<BuyOrderRequest, BuyOrders, BuyOrderResponse>(
-              request,
-              entityFactory: (req, id) =>
-              {
-                  BuyOrders order = req.ToBuyOrder();
-                  order.BuyOrderID = id;
-                  _buyOrders.Add(order);
-                  return order;
-              },
-              ToMapResponse: buyOrder => buyOrder.ToBuyOrderResponse());
+            return await CreateOrder<BuyOrderRequest, BuyOrder, BuyOrderResponse>(
+                request,
+                entityFactory: async (req, id) =>
+                {
+                    BuyOrder order = req.ToBuyOrder();
+                    order.BuyOrderID = id;
+                    await _stockRepository.AddBuyOrder(order);
+                    return order;
+                },
+                ToMapResponse: buyOrder => buyOrder.ToBuyOrderResponse());
         }
-            
+
         public async Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? request)
         {
-            return await CreateOrder<SellOrderRequest, SellOrders, SellOrderResponse>(
+            return await CreateOrder<SellOrderRequest, SellOrder, SellOrderResponse>(
                 request,
-                entityFactory: (req, id) =>
+                entityFactory: async (req, id) =>
                 {
-                    SellOrders sellOrder = req.ToSellOrder();
+                    SellOrder sellOrder = req.ToSellOrder();
                     sellOrder.SellOrderID = id;
-                    _sellOrders.Add(sellOrder);
+                    await _stockRepository.AddSellOrder(sellOrder);
                     return sellOrder;
                 },
                 ToMapResponse: entity => entity.ToSellOrderResponse());
@@ -63,13 +67,20 @@ namespace StocksApp.Server.Services
 
         public async Task<List<BuyOrderResponse>> GetAllBuyOrders()
         {
-            List<BuyOrderResponse> buyOrders = _buyOrders.Select(o => o.ToBuyOrderResponse()).ToList();
-            return await Task.FromResult(buyOrders); 
+            var buyOrders = await _stockRepository.GetAllBuyOrders();
+            return buyOrders.Select(o => o.ToBuyOrderResponse()).ToList();
         }
 
-        public Task<List<SellOrderResponse>> GetAllSellOrders()
+        public async Task<List<SellOrderResponse>> GetAllSellOrders()
         {
-            return Task.FromResult(_sellOrders.Select(so => so.ToSellOrderResponse()).ToList());
+            var sellOrders = await _stockRepository.GetAllSellOrders();
+            return sellOrders.Select(o => o.ToSellOrderResponse()).ToList();
+        }
+
+        public async Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            return await _stockRepository.GetFilteredStocks<T>(predicate);
         }
     }
 }
+

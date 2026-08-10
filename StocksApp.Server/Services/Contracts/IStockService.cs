@@ -1,4 +1,5 @@
 ﻿using StocksApp.Server.DTOs;
+using System.Linq.Expressions;
 
 namespace StocksApp.Server.Services.Contracts
 {
@@ -30,5 +31,14 @@ namespace StocksApp.Server.Services.Contracts
         /// </summary>
         /// <returns>Returns the existing list of sell orders retrieved from database table called 'SellOrders'.</returns>
         Task<List<SellOrderResponse>> GetAllSellOrders();
+
+        /// <summary>
+        /// get all the existing of all T stored with filter
+        /// </summary>
+        /// <typeparam name="T"> db set that you want to filter </typeparam>
+        /// <param name="predicate"> condition to filter by </param>
+        /// <returns>List of filtered items</returns>
+        Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class;
+
     }
 }
