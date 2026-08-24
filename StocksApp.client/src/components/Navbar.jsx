@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { Toaster } from "react-hot-toast";
 const NAVLINKS = [
   { name: "Persons", path: "/persons" },
-  { name: "Company", path: "/company" },
+  { name: "Stocks", path: "/stocks" },
   { name: "Upload Countries", path: "/country" },
 ];
 

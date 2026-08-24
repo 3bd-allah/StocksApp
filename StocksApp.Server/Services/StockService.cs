@@ -1,6 +1,7 @@
 ﻿using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using SerilogTimings;
 using StocksApp.Server.DTOs;
 using StocksApp.Server.Entities;
 using StocksApp.Server.IRepository;
@@ -13,11 +14,11 @@ namespace StocksApp.Server.Services
     public class StockService : IStockService
     {
         private readonly IStockRepository _stockRepository;
-
-        public StockService(IStockRepository stockRepository)
+        private readonly ILogger<StockService> _logger;
+        public StockService(IStockRepository stockRepository, ILogger<StockService> logger)
         {
             _stockRepository = stockRepository;
-
+            _logger = logger;
         }
 
         private async Task<TResponse> CreateOrder<TRequest, TEntity, TResponse>(
@@ -67,12 +68,17 @@ namespace StocksApp.Server.Services
 
         public async Task<List<BuyOrderResponse>> GetAllBuyOrders()
         {
-            var buyOrders = await _stockRepository.GetAllBuyOrders();
+            List<BuyOrder> buyOrders;
+            using (Operation.Time("Time of Getting all Buy Orders from Database"))
+            {
+                buyOrders = await _stockRepository.GetAllBuyOrders();
+            }
             return buyOrders.Select(o => o.ToBuyOrderResponse()).ToList();
         }
 
         public async Task<List<SellOrderResponse>> GetAllSellOrders()
         {
+            _logger.LogInformation("From Get All Sell Orders method");
             var sellOrders = await _stockRepository.GetAllSellOrders();
             return sellOrders.Select(o => o.ToSellOrderResponse()).ToList();
         }

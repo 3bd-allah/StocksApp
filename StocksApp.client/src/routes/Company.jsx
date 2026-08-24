@@ -1,11 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useLoaderData } from "react-router";
-import CompanyProfile from "../pages/company/CompanyProfile";
+import CompanyProfile from "../pages/stocks/CompanyProfile";
 
 const Company = () => {
-  const { companyData } = useLoaderData();
-  console.log(companyData);
-  return <CompanyProfile companyData={companyData} />;
+  return <CompanyProfile />;
 };
 
 export default Company;

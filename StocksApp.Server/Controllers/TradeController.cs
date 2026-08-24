@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using StocksApp.Server.Options;
 using StocksApp.Server.Services.Contracts;
 using StocksApp.Server.DTOs;
+using Serilog;
 namespace StocksApp.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -11,21 +12,30 @@ namespace StocksApp.Server.Controllers
         IFinnhubService _finnhubService,
         IStockService _stockService,
         IOrdersPdfGenerator _ordersPdfGenerator,
-        IOptionsSnapshot<TradingOptions> tradingOptions) : ControllerBase
+        IOptionsSnapshot<TradingOptions> tradingOptions,
+        ILogger<TradeController> _logger,
+        IDiagnosticContext diagnosticContext) : ControllerBase
     {
         [HttpGet("company-profile")]
-        public async Task<ActionResult<StockTradeDTO>> CompanyProfile()
+        public async Task<ActionResult<StockTradeDTO>> CompanyProfile([FromQuery] string? stockSymbol)
         {
-            var profileRes = await _finnhubService.GetCompanyProfileAsync(tradingOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
-            var stockRes = await _finnhubService.GetStockPriceQuoteAsync(tradingOptions.Value.DefaultFinnhubSymbol ?? "MSFT");
-
-            return Ok(new StockTradeDTO
+            _logger.LogInformation("Company Profile from Trade Controller");
+            _logger.LogDebug($"Finnhub Symbol:{tradingOptions.Value.DefaultFinnhubSymbol}");
+            TradeCompanyProfile profileRes = await _finnhubService.GetCompanyProfile(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
+            var stockRes = await _finnhubService.GetStockPriceQuote(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
+            var stockTradeResponse = new StockTradeDTO
             {
                 StockName = profileRes.Ticker,
                 StockSymbol = profileRes.Name,
-                Price = Convert.ToDouble(stockRes["h"]?.ToString()),
-                Quantity = tradingOptions.Value.DefaultTradingQuantity 
-            });
+                Logo = profileRes.Logo,
+                Exchange = profileRes.Exchange,
+                FinnhubIndustry = profileRes.FinnhubIndustry,
+                Price = Convert.ToDouble(stockRes!["h"]?.ToString()),
+                Quantity = tradingOptions.Value.DefaultTradingQuantity
+            };
+            _logger.LogInformation("Stock Object: {Stock}", stockTradeResponse);
+            _logger.LogInformation("Stock Object: {@Stock}", stockTradeResponse);
+            return Ok(stockTradeResponse);
         }
 
         [HttpPost("buyOrder")]
@@ -45,15 +55,25 @@ namespace StocksApp.Server.Controllers
             return Ok(sellOrderResponse);
         }
 
+        // get: api/trade/orders
         [HttpGet("orders")]
-        public async Task<IActionResult> Orders()
+        public async Task<ActionResult<Orders>> Orders()
         {
             // Implementation for retrieving orders
             var buyOrders = await _stockService.GetAllBuyOrders();
+            _logger.LogInformation("About to hit diagnosticContext");
+            diagnosticContext.Set("Buy Orders:", buyOrders, true);
+            _logger.LogInformation("After logging the diagnosticContext");
             var sellOrders = await _stockService.GetAllSellOrders();
-            return Ok(new { BuyOrders = buyOrders, SellOrders = sellOrders });
+            return Ok(new Orders
+            {
+                BuyOrders = buyOrders,
+                SellOrders = sellOrders
+            });
         }
 
+
+        //get: api/trade/orders-pdf
         [HttpGet("orders-pdf")]
         public async Task<IActionResult> OrdersPDF()
         {

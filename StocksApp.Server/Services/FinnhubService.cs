@@ -1,4 +1,8 @@
-﻿using StocksApp.Server.DTOs;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using StocksApp.Server.DTOs;
+using StocksApp.Server.IRepository;
+using StocksApp.Server.Options;
 using StocksApp.Server.Services.Contracts;
 using System.Text.Json;
 
@@ -6,48 +10,55 @@ namespace StocksApp.Server.Services
 {
     public class FinnhubService : IFinnhubService
     {
-        private readonly IConfiguration _configuration;
-        private readonly IHttpClientFactory _httpClientFactory;
-        public FinnhubService (IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        private readonly ILogger<FinnhubService> _logger;
+        private readonly IFinnhubRepository _finnhubRepository;
+        private readonly IOptions<TradingOptions> _tradingOptions;
+        public FinnhubService (
+            ILogger<FinnhubService> logger,
+            IFinnhubRepository finnhubRepository,
+            IOptions<TradingOptions> tradingOptions)
         {
-            _configuration = configuration;
-            _httpClientFactory = httpClientFactory;
+            _logger = logger;
+            _finnhubRepository = finnhubRepository;
+            _tradingOptions = tradingOptions;
         }
 
-        private string Token { get => _configuration.GetValue<string>("FinnhubToken")!; }
 
-        private async Task<T> GetFrom<T>(string link)
+        public async Task<TradeCompanyProfile> GetCompanyProfile(string symbol)
         {
-            using (var httpClient = _httpClientFactory.CreateClient())
+            _logger.LogInformation("GetCompanyProfileAsync form FinnhubService");
+            _logger.LogDebug("Symbol of Company: {symbol}", symbol);
+            return await _finnhubRepository.GetCompanyProfileAsync(symbol);
+        }
+
+        public async Task<Dictionary<string, object>?> GetStockPriceQuote(string symbol)
+        {
+            _logger.LogInformation("GetStockPriceQuoteAsync form FinnhubService");
+            
+            return await _finnhubRepository.GetStockPriceQuoteAsync(symbol); 
+        }
+
+        public async Task<List<Stock>> GetAllPopularStocks()
+        {
+            var listAllStocks = await _finnhubRepository.GetAllStocksAsync();
+            // TODO: filter top popular stocks
+            var top25PopularStocks = new List<Stock>();
+            foreach (var stock in listAllStocks!)
             {
-                HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(link);
-
-                
-                Stream stream = await httpResponseMessage.Content.ReadAsStreamAsync();
-
-                StreamReader streamReader = new StreamReader(stream);
-                string response = await streamReader.ReadToEndAsync();
-
-                T? responseDicitonary = JsonSerializer.Deserialize<T>(response, new JsonSerializerOptions
+                if (stock.Symbol is not null)
                 {
-                    PropertyNameCaseInsensitive = true
-                })!;
-
-                return responseDicitonary;
+                    if (_tradingOptions.Value.PopularStocks!.Contains(stock.Symbol))
+                    {
+                        top25PopularStocks.Add(stock);
+                    }
+                }
             }
-        }
-        public async Task<TradeCompanyProfile> GetCompanyProfileAsync(string symbol)
-        {
-            
-            string link = $"https://finnhub.io/api/v1/stock/profile2?symbol={symbol}&token={Token}";
-            return await GetFrom<TradeCompanyProfile>(link) ;
+            return top25PopularStocks;
         }
 
-        public async Task<Dictionary<string, object?>> GetStockPriceQuoteAsync(string symbol)
+        public async Task<SearchStocks?> SearchStocks(string symbolName)
         {
-            
-            string link = $"https://finnhub.io/api/v1/quote?symbol={symbol}&token={Token}";
-            return await GetFrom<Dictionary<string, object?>>(link); 
+            return await _finnhubRepository.SearchStocksAsync(symbolName);
         }
     }
 }

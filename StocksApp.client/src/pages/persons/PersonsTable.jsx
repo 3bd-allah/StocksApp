@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import Loading from "../../components/Loading";
-import { formatDateOnly } from "../../utilities/helperFunctions";
+import { formatDateOnly } from "../../utilities/dateFormatters";
 const PersonProperties = [
   { name: "Person Name", sortable: true },
   { name: "Email", sortable: true },

@@ -30,12 +30,17 @@ namespace StocksApp.Server.Repository
 
         public async Task<List<BuyOrder>> GetAllBuyOrders()
         {
-            return await _db.BuyOrders.ToListAsync();
+            return await _db.BuyOrders.AsNoTracking()
+                .OrderByDescending(bo => bo.DateAndTimeOfOrder)
+                .ToListAsync();
         }
 
         public async Task<List<SellOrder>> GetAllSellOrders()
         {
-            return await _db.SellOrders.ToListAsync();
+            return await _db.SellOrders
+                .AsNoTracking()
+                .OrderByDescending(so => so.DateAndTimeOfOrder)
+                .ToListAsync();
         }
 
         public async Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class

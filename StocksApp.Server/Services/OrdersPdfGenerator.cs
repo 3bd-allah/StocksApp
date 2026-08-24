@@ -14,13 +14,13 @@ namespace StocksApp.Server.Services
         
         public async Task<byte[]> GenerateOrdersPdfAsync()
         {
-            var buyOrders = (await _stockService.GetFilteredStocks<BuyOrder>(bo => bo.StockSymbol == "MSFT"))
-                .Select(bo => bo.ToBuyOrderResponse());
+            Orders allOrders = new();
+            allOrders.BuyOrders = (await _stockService.GetFilteredStocks<BuyOrder>(bo => bo.StockSymbol == "MSFT"))
+                .Select(bo => bo.ToBuyOrderResponse()).ToList();
 
-            var sellOrders = (await _stockService.GetFilteredStocks<SellOrder>(so => so.StockSymbol == "MSFT"))
-                .Select(so => so.ToSellOrderResponse());
+            allOrders.SellOrders = (await _stockService.GetFilteredStocks<SellOrder>(so => so.StockSymbol == "MSFT"))
+                .Select(so => so.ToSellOrderResponse()).ToList();
 
-            List<object> allOrders = [..buyOrders, ..sellOrders];
 
             var viewModel = OrdersReportViewModel.FromRowOrders(allOrders);
 

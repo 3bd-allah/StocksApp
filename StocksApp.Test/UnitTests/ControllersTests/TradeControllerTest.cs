@@ -47,16 +47,16 @@ namespace StocksApp.Test.UnitTests.ControllersTests
         public async Task GetCompanyProfile_ToBeSuccessful()
         {
             // Arrange
-            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions);
+            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions,null!);
             var companyProfile = _fixture.Create<TradeCompanyProfile>();
             var tradingOptions = _fixture.Create<TradingOptions>();
    
             _tradingOptionsMock.Setup(options => options.Value).Returns(tradingOptions);
 
-            _finnhubServiceMock.Setup(finnhub => finnhub.GetCompanyProfileAsync(tradingOptions.DefaultFinnhubSymbol!))
+            _finnhubServiceMock.Setup(finnhub => finnhub.GetCompanyProfile(tradingOptions.DefaultFinnhubSymbol!))
                 .ReturnsAsync(companyProfile);
 
-            _finnhubServiceMock.Setup(finnhub => finnhub.GetStockPriceQuoteAsync(tradingOptions.DefaultFinnhubSymbol!))
+            _finnhubServiceMock.Setup(finnhub => finnhub.GetStockPriceQuote(tradingOptions.DefaultFinnhubSymbol!))
                 .ReturnsAsync(new Dictionary<string, object?>() { ["h"] = 100.0 });
 
             // Act
@@ -72,7 +72,7 @@ namespace StocksApp.Test.UnitTests.ControllersTests
         public async Task CreateBuyOrder_WithValidData_ToBeSuccessful()
         {
             // Arrange
-            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions);
+            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions,null!);
             var buyOrderRequest = _fixture.Build<BuyOrderRequest>()
                 .With(bo => bo.DateAndTimeOfOrder, DateTime.Parse("2023-01-01T00:00:00"))
                 .With(bo => bo.Quantity, Convert.ToDouble(100))
@@ -95,7 +95,7 @@ namespace StocksApp.Test.UnitTests.ControllersTests
         public async Task CreateBuyOrder_WithInValidData_ToThrowNullArgumentException()
         {
             // Arrange
-            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions);
+            var controller = new TradeController(_finnhubService, _stockService, null!, _tradingOptions,null!);
             
 
             _stockServiceMock.Setup(stock => stock.CreateBuyOrder(null))

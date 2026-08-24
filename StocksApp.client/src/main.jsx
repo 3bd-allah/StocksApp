@@ -10,16 +10,21 @@ import "./api/configuration/axios-global-config.js";
 import App from "./App.jsx";
 import RootErrorBoundary from "./routes/RootErrorBoundary.jsx";
 import { loader as personDetailsLoader } from "./routes/PersonDetails.jsx";
-import EditPerson from "./routes/EditPerson.jsx";
 import { queryClient } from "./queries/queryClient.js";
 import DeletePerson from "./routes/DeletePerson.jsx";
 import PersonDetails from "./routes/PersonDetails.jsx";
 import DownloadAsPDF from "./routes/DownloadAsPDF.jsx";
-import UploadCountries from "./routes/UploadCountries.jsx";
+import StocksExplore from "./pages/stocks/StocksExplore.jsx";
+import StocksOrders from "./pages/stocks/StocksOrders.jsx";
+import StocksLandingPage from "./pages/stocks/StocksLandingPage.jsx";
+import {loader as companyLoader} from './routes/Company.jsx'
 // lazy loading
 const Persons = lazy(() => import("./routes/Persons.jsx"));
+const UploadCountries = lazy(()=> import('./routes/UploadCountries.jsx'))
+const EditPerson = lazy(()=> import('./routes/EditPerson.jsx'))
 const CompanyProfile = lazy(() => import("./routes/Company.jsx"));
 const NewPerson = lazy(() => import("./routes/NewPerson.jsx"));
+const Stocks = lazy(()=> import('./routes/Stocks.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -28,10 +33,15 @@ const router = createBrowserRouter([
     errorElement: <RootErrorBoundary />,
     children: [
       {
-        path: "company",
-        element: <CompanyProfile />,
-        loader: () =>
-          import("./routes/Company.jsx").then((module) => module.loader()),
+        path: "stocks",
+        element: <Stocks />,
+        children:[
+          {index: true, element:<StocksLandingPage />},
+          {path: 'explore', element: <StocksExplore /> },
+          {path: 'orders', element: <StocksOrders />},
+          {path: 'trade', element: <CompanyProfile />}
+
+        ]
       },
       {
         path: "persons",

@@ -16,7 +16,7 @@ namespace StocksApp.Server.AppDbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var (buyOrders, sellOrders) = DataGenerator.GenerateSeedData(1000);
+            var (buyOrders, sellOrders) = DataGenerator.GenerateSeedData(0);
             
             modelBuilder.Entity<BuyOrder>()
                 .ToTable("BuyOrders")

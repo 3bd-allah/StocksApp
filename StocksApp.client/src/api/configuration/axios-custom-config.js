@@ -11,4 +11,8 @@ const personsApi = axios.create({
 const countryApi = axios.create({
     baseURL:'http://localhost:5115/api'
 })
-export { personsApi, countryApi }
+
+const stocksApi = axios.create({
+    baseURL:'http://localhost:5000/api'
+})
+export { personsApi, countryApi, stocksApi }
