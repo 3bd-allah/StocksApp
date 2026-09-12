@@ -1,4 +1,5 @@
-﻿using StocksApp.Server.DTOs;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using StocksApp.Server.DTOs;
 using StocksApp.Server.Entities;
 using System.Linq.Expressions;
 
@@ -39,6 +40,30 @@ namespace StocksApp.Server.IRepository
         /// <typeparam name="T"> db set that you want to filter </typeparam>
         /// <param name="predicate"> condition to filter by </param>
         /// <returns>List of filtered items</returns>
-        Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class;
+        Task<List<T>> GetFilteredStocksAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
+
+        /// <summary>
+        /// check if the DbSet has next record in the DB
+        /// </summary>
+        /// <typeparam name="T">The DbSet to check based on</typeparam>
+        /// <param name="predicate">condition to check based on</param>
+        /// <returns>true if there is next record false ,otherwise</returns>
+        public Task<bool> HasNext<T>(Expression<Func<T, bool>> predicate) where T : class;
+
+        /// <summary>
+        /// get the page result after the cursor
+        /// </summary>
+        /// <param name="cursor">encoded cursor to get page result after</param>
+        /// <returns>returns the page result after the encoded cursor</returns>
+        public Task<PagedResult<BuyOrder>> GetBuyOrdersPagedResultAsync (OrderCursor cursor);
+
+
+        /// <summary>
+        /// get the page result after the cursor
+        /// </summary>
+        /// <param name="cursor">encoded cursor to get page result after</param>
+        /// <returns>returns the page result after the encoded cursor</returns>
+        public Task<PagedResult<SellOrder>> GetSellOrdersPagedResultAsync(OrderCursor cursor);
+
     }
 }

@@ -40,5 +40,19 @@ namespace StocksApp.Server.Services.Contracts
         /// <returns>List of filtered items</returns>
         Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class;
 
+        /// <summary>
+        /// get the list of orders after the cursor
+        /// </summary>
+        /// <param name="cursor">encoded cursor to get page result after</param>
+        /// <returns>returns the page result of buy orders after the encoded cursor</returns>
+        Task <PagedResult<BuyOrderResponse>?> GetPaginatedBuyOrders(OrderCursor cursor);
+
+        /// <summary>
+        /// get the list of orders after the cursor
+        /// </summary>
+        /// <param name="cursor">encoded cursor to get page result after</param>
+        /// <returns>returns the page result of sell orders after the encoded cursor</returns>
+        Task<PagedResult<SellOrderResponse>?> GetPaginatedSellOrders(OrderCursor? cursor);
+
     }
 }

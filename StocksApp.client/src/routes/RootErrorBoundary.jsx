@@ -4,9 +4,7 @@ import { useRouteError } from "react-router";
 
 function RootErrorBoundary() {
   const error = useRouteError();
-  console.log('error from error element',error);
-  console.log(error.title)
-  console.log(error.message)
+ 
   return (
     <>
       <Navbar />

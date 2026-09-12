@@ -17,7 +17,6 @@ import DownloadAsPDF from "./routes/DownloadAsPDF.jsx";
 import StocksExplore from "./pages/stocks/StocksExplore.jsx";
 import StocksOrders from "./pages/stocks/StocksOrders.jsx";
 import StocksLandingPage from "./pages/stocks/StocksLandingPage.jsx";
-import {loader as companyLoader} from './routes/Company.jsx'
 // lazy loading
 const Persons = lazy(() => import("./routes/Persons.jsx"));
 const UploadCountries = lazy(()=> import('./routes/UploadCountries.jsx'))
@@ -75,5 +74,5 @@ createRoot(document.getElementById("root")).render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );

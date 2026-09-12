@@ -3,6 +3,10 @@ using StocksApp.Server.IRepository;
 using StocksApp.Server.AppDbContext;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.SignalR;
+using StocksApp.Server.DTOs;
+using System.Runtime.InteropServices;
 
 namespace StocksApp.Server.Repository
 {
@@ -14,6 +18,7 @@ namespace StocksApp.Server.Repository
             _db = db;
         }
 
+        const int pageSize = 20;
         public async Task<BuyOrder> AddBuyOrder(BuyOrder buyOrder)
         {
             _db.BuyOrders.Add(buyOrder);
@@ -30,7 +35,8 @@ namespace StocksApp.Server.Repository
 
         public async Task<List<BuyOrder>> GetAllBuyOrders()
         {
-            return await _db.BuyOrders.AsNoTracking()
+            return await _db.BuyOrders
+                .AsNoTracking()
                 .OrderByDescending(bo => bo.DateAndTimeOfOrder)
                 .ToListAsync();
         }
@@ -43,9 +49,67 @@ namespace StocksApp.Server.Repository
                 .ToListAsync();
         }
 
-        public async Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class
+        public async Task<List<T>> GetFilteredStocksAsync<T>(Expression<Func<T, bool>> predicate) where T : class
         {
+            // Immediate Execution => i think if we change it to IQueryable it's better for performace 
+            //whicn is Defferred Execution
             return await _db.Set<T>().Where(predicate).ToListAsync();
+        }
+
+        public async Task<bool> HasNext<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            return await _db.Set<T>().AnyAsync(predicate);
+        }
+
+        public async Task<PagedResult<BuyOrder>> GetBuyOrdersPagedResultAsync(OrderCursor cursor)
+        {
+
+            var query = _db.BuyOrders.AsNoTracking();
+
+            if(cursor is not null)
+            {
+                query = query.Where(bo => bo.DateAndTimeOfOrder < cursor.CraetedAt ||
+                (bo.DateAndTimeOfOrder == cursor.CraetedAt && bo.BuyOrderID < cursor.OrderId));
+            }
+
+            var rawItems = await query
+                .OrderByDescending(bo => bo.DateAndTimeOfOrder)
+                .ThenByDescending(bo => bo.BuyOrderID)
+                .Take(pageSize + 1)
+                .ToListAsync();
+
+            PagedResult<BuyOrder> buyOrdersPagedResult = new PagedResult<BuyOrder>();
+                
+            buyOrdersPagedResult.HasNextPage = rawItems.Count > pageSize;
+            buyOrdersPagedResult.Items = rawItems.Take(pageSize).ToList();
+            buyOrdersPagedResult.Cursor = buyOrdersPagedResult.Items.Last().ToOrderCursor();
+            
+            return buyOrdersPagedResult;
+        }
+
+        public async Task<PagedResult<SellOrder>> GetSellOrdersPagedResultAsync(OrderCursor cursor)
+        {
+            var query = _db.SellOrders.AsNoTracking();
+
+            if(cursor is not null)
+            {
+                query = query.Where(so => so.DateAndTimeOfOrder < cursor.CraetedAt ||
+                (so.DateAndTimeOfOrder == cursor.CraetedAt && so.SellOrderID < cursor.OrderId));
+            }
+
+            var rawItems = await query.OrderByDescending(so => so.DateAndTimeOfOrder)
+                .ThenByDescending(so => so.SellOrderID)
+                .Take(pageSize + 1)
+                .ToListAsync();
+
+            PagedResult<SellOrder> sellOrderspagedResult = new PagedResult<SellOrder>();
+
+            sellOrderspagedResult.HasNextPage = rawItems.Count > pageSize;
+            sellOrderspagedResult.Items = rawItems.Take(pageSize).ToList();
+            sellOrderspagedResult.Cursor = sellOrderspagedResult.Items.
+                Select(so => new OrderCursor(so.DateAndTimeOfOrder, so.SellOrderID)).Last();
+
+            return sellOrderspagedResult;
         }
     }
 }

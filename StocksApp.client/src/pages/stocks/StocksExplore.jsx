@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getAllStocks, getCompanyProfile } from "../../api/stocks";
 import { useOutletContext } from "react-router";
-import Loading from "../../components/Loading";
+import StockCardSkeleton from "../../components/StockCardSkeleton";
 
 const StocksExplore = () => {
   // hooks
@@ -37,7 +37,8 @@ const StocksExplore = () => {
 
   function handleSelectedStock(stockSymbol) {
     setSelectedStock(stockSymbol);
-    setSearchStocks(null);
+    // it will cause the getAllStocks api fn to be executed again when we select any company profile to be shown cause it will re-render the component.
+    // setSearchStocks(null);
   }
 
   function handleRefetchAllExploreStocks() {
@@ -61,7 +62,7 @@ const StocksExplore = () => {
       <section className="w-full">
         {/* CompanyProfile or detail view goes here */}
         {!selectedStock && <p>Click a Stock on the left to see details.</p>}
-        {isLoadingCompanyProfile && <Loading />}
+        {isLoadingCompanyProfile && <StockCardSkeleton />}
         {companyProfile && <SelectedStockView stock={companyProfile} />}
       </section>
     </div>

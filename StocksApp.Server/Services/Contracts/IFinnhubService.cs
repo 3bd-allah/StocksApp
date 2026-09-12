@@ -22,7 +22,7 @@ namespace StocksApp.Server.Services.Contracts
 
 
         /// <summary>
-        /// get popular stocks in the market
+        /// get popular stocks in the market    
         /// </summary>
         /// <returns>returns top 25 popular stocks in the market</returns>
         Task<List<Stock>> GetAllPopularStocks();

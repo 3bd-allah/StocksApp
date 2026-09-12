@@ -28,14 +28,14 @@ namespace StocksApp.Server.Services
             ) where TRequest : class
         {
             if(request is null) throw new ArgumentNullException(nameof(request));
-
+    
             ValidationHelper.ModelValidation(request);
 
             Guid newID = Guid.CreateVersion7();
 
             TEntity newOrder = await entityFactory(request, newID);
 
-
+            
             return ToMapResponse(newOrder);
         }
         public async Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? request)
@@ -85,7 +85,44 @@ namespace StocksApp.Server.Services
 
         public async Task<List<T>> GetFilteredStocks<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            return await _stockRepository.GetFilteredStocks<T>(predicate);
+            return await _stockRepository.GetFilteredStocksAsync<T>(predicate);
+        }
+
+        public async Task<PagedResult<BuyOrderResponse>?> GetPaginatedBuyOrders(OrderCursor? cursor)
+        {
+            // TODO: Decoding the cursor => I think there is the role of action filters.
+
+            //OrderCursor? orderCursor = CursorEncoder.Decode(cursor);
+
+            // TODO: get the data from the repository.
+
+            var dbPagedResult = await _stockRepository.GetBuyOrdersPagedResultAsync(cursor!);
+
+            PagedResult<BuyOrderResponse> result = new()
+            {
+                Items = dbPagedResult.Items?.Select(bo => bo.ToBuyOrderResponse()).ToList(),
+                Cursor = dbPagedResult.Cursor,
+                HasNextPage = dbPagedResult.HasNextPage,
+            };
+            // TODO: Encoding the cursor before returning it to the controller.
+            
+
+            return result; 
+        }
+
+        public async Task<PagedResult<SellOrderResponse>?> GetPaginatedSellOrders(OrderCursor? cursor)
+        {
+
+            var dbPagedResult = await _stockRepository.GetSellOrdersPagedResultAsync(cursor!);
+
+            PagedResult<SellOrderResponse> result = new()
+            {
+                Items = dbPagedResult.Items?.Select(so => so.ToSellOrderResponse()).ToList(),
+                Cursor = dbPagedResult.Cursor,
+                HasNextPage = dbPagedResult.HasNextPage,
+            };
+
+            return result;
         }
     }
 }

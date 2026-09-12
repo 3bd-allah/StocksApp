@@ -29,7 +29,7 @@ namespace StocksApp.Server.DTOs
     }
 
 
-    public static class BuyOrderExtensions{ 
+    public static partial class BuyOrderExtensions{ 
         
         public static BuyOrderResponse ToBuyOrderResponse(this BuyOrder buyOrder)
         {

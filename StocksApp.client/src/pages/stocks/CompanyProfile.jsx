@@ -50,7 +50,7 @@ const CompanyProfile = () => {
       stockSymbol: stockData.stockSymbol,
       stockName: stockData.stockName,
       price: stockData.price,
-      quantity: stockData.quantity,
+      quantity,
     };
     const { signal } = new AbortController();
     createBuy({ signal, buyOrderData });
@@ -62,7 +62,7 @@ const CompanyProfile = () => {
       stockSymbol: stockData.stockSymbol,
       stockName: stockData.stockName,
       price: stockData.price,
-      quantity: stockData.quantity,
+      quantity,
     };
     const { signal } = new AbortController();
     createSell({ signal, sellOrderData });

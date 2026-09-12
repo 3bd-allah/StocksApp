@@ -19,7 +19,7 @@ namespace StocksApp.Test.UnitTests.ServicesTests
         {
             stockRepositoryMock = new Mock<IStockRepository>();
             stockRepository = stockRepositoryMock.Object;
-            _stockService = new StockService(stockRepository);
+            _stockService = new StockService(stockRepository,null);
             outputHelper = test;
             autoFixture = new Fixture();
         }

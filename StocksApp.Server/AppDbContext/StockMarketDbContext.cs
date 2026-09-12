@@ -26,6 +26,13 @@ namespace StocksApp.Server.AppDbContext
                 .ToTable("SellOrders")
                 .HasData(sellOrders);
 
+            modelBuilder.Entity<BuyOrder>()
+                .HasIndex(bo => new { bo.DateAndTimeOfOrder, bo.BuyOrderID }, "IX_BuyOrders_CreatedAt_ID")
+                .IsDescending(true, true);
+
+            modelBuilder.Entity<SellOrder>()
+                .HasIndex(so => new { so.DateAndTimeOfOrder, so.SellOrderID }, "IX_SellOrders_CreatedAt_ID")
+                .IsDescending(true, true);
         }
 
     }

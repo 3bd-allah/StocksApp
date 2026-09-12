@@ -1,5 +1,5 @@
 ﻿using StocksApp.Server.DTOs;
-
+using StocksApp.Server.Application.Common;
 namespace StocksApp.Server.IRepository
 {
     public interface IFinnhubRepository
@@ -17,7 +17,7 @@ namespace StocksApp.Server.IRepository
         /// </summary>
         /// <param name="stockSymbol">The stock symbol for which to retrieve price information.</param>
         /// <returns>A dictionary containing the stock price quote.</returns>
-        Task<Dictionary<string, object>?> GetStockPriceQuoteAsync(string stockSymbol);
+        Task<Dictionary<string, object>> GetStockPriceQuoteAsync(string stockSymbol);
 
         /// <summary>
         /// fetch all available stocks in the market

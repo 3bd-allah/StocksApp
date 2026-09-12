@@ -4,6 +4,8 @@ using StocksApp.Server.Options;
 using StocksApp.Server.Services.Contracts;
 using StocksApp.Server.DTOs;
 using Serilog;
+using StocksApp.Server.Filters.ActionFilters;
+using StocksApp.Server.Filters.ExceptionFilters;
 namespace StocksApp.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -20,9 +22,21 @@ namespace StocksApp.Server.Controllers
         public async Task<ActionResult<StockTradeDTO>> CompanyProfile([FromQuery] string? stockSymbol)
         {
             _logger.LogInformation("Company Profile from Trade Controller");
+            // Not Structured Logging
             _logger.LogDebug($"Finnhub Symbol:{tradingOptions.Value.DefaultFinnhubSymbol}");
-            TradeCompanyProfile profileRes = await _finnhubService.GetCompanyProfile(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
-            var stockRes = await _finnhubService.GetStockPriceQuote(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
+            var profileResTask = _finnhubService.GetCompanyProfile(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
+            var stockResTask = _finnhubService.GetStockPriceQuote(stockSymbol ?? tradingOptions.Value.DefaultFinnhubSymbol!);
+            
+            // await both tasks to finish in parallel 
+            await Task.WhenAll(profileResTask, stockResTask);
+
+            var profileRes = profileResTask.Result;
+            var stockRes = stockResTask.Result;
+
+            if(profileRes is null || stockRes is null)
+            {
+                return NotFound(new {message = "you don't have access for this company profile" });
+            }
             var stockTradeResponse = new StockTradeDTO
             {
                 StockName = profileRes.Ticker,
@@ -33,30 +47,35 @@ namespace StocksApp.Server.Controllers
                 Price = Convert.ToDouble(stockRes!["h"]?.ToString()),
                 Quantity = tradingOptions.Value.DefaultTradingQuantity
             };
+            // Structured Logging
             _logger.LogInformation("Stock Object: {Stock}", stockTradeResponse);
             _logger.LogInformation("Stock Object: {@Stock}", stockTradeResponse);
             return Ok(stockTradeResponse);
         }
 
         [HttpPost("buyOrder")]
-        public async Task<ActionResult<BuyOrderResponse>> BuyOrder([FromBody] BuyOrderRequest buyOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        [TypeFilter(typeof(OrderRequestExceptionFitler))]
+        public async Task<ActionResult<BuyOrderResponse>> BuyOrder([FromBody] BuyOrderRequest orderRequest)
         {
             // Implementation for buying orders
-            BuyOrderResponse buyOrderResponse = await _stockService.CreateBuyOrder(buyOrderRequest);
-            return Ok(buyOrderResponse);
+            BuyOrderResponse buyOrderResponse = await _stockService.CreateBuyOrder(orderRequest);
+            return Created();
         }
 
         [HttpPost("sellOrder")]
-        public async Task<ActionResult<SellOrderResponse>> SellOrder([FromBody] SellOrderRequest sellOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        public async Task<ActionResult<SellOrderResponse>> SellOrder([FromBody] SellOrderRequest orderRequest)
         {
             // Implementation for selling orders
 
-            SellOrderResponse sellOrderResponse = await _stockService.CreateSellOrder(sellOrderRequest);
-            return Ok(sellOrderResponse);
+            SellOrderResponse sellOrderResponse = await _stockService.CreateSellOrder(orderRequest);
+            return Created();
         }
 
         // get: api/trade/orders
         [HttpGet("orders")]
+        [TypeFilter(typeof(TradeOrdersActionFilter))]
         public async Task<ActionResult<Orders>> Orders()
         {
             // Implementation for retrieving orders
@@ -64,7 +83,9 @@ namespace StocksApp.Server.Controllers
             _logger.LogInformation("About to hit diagnosticContext");
             diagnosticContext.Set("Buy Orders:", buyOrders, true);
             _logger.LogInformation("After logging the diagnosticContext");
-            var sellOrders = await _stockService.GetAllSellOrders();
+            var sellOrders= await _stockService.GetAllSellOrders();
+
+
             return Ok(new Orders
             {
                 BuyOrders = buyOrders,

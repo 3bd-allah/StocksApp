@@ -9,6 +9,9 @@
         public string? Exchange{ get; set; }
         public Uri? Logo{ get; set; }
         public string? FinnhubIndustry { get; set; }
+        public string? Error { get; set; }
+
+        public bool IsSuccess => Error is null;
 
     }
 }

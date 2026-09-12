@@ -1,27 +1,54 @@
 import toast from "react-hot-toast";
-import { downloadOrdersAsPdf, getAllOrders } from "../../api/stocks";
-import BuyOrders from "./BuyOrders"
-import SellOrders from "./SellOrders"
-import { useMutation, useQuery } from "@tanstack/react-query" 
+import {
+  downloadOrdersAsPdf,
+  getBuyOrdersInPages,
+  getSellOrdersInPages,
+} from "../../api/stocks";
+import BuyOrders from "./BuyOrders";
+import SellOrders from "./SellOrders";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 
 const StocksOrders = () => {
 
-  const {data: allOrders, isLoading: isLoadingOrders} = useQuery({
-    queryKey:['orders'],
-    queryFn: getAllOrders
+ 
+
+  const {
+    data: buyOrdersData,
+    fetchNextPage: fetchBuyOrdersNextPage,
+    hasNextPage: isBuyOrdersHasNextPage,
+    isLoading: isLoadingBuyOrders,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ["buy-orders-pages"],
+    queryFn: ({ signal, pageParam }) =>
+      getBuyOrdersInPages({ signal, nextCursor: pageParam }),
+    initialPageParam: null,
+    getNextPageParam: (result) => result.cursor,
   });
 
-  const {mutate: downloadPDF, isPending: isDownloadingPDF} =useMutation({
-    mutationKey:['download-orders'],
-    mutationFn: downloadOrdersAsPdf,
-    onSuccess:()=> toast.success('Orders pdf downloaded successfully'),
-    onError:() => toast.error("Error !")
+  const {
+    data: sellOrdersData, 
+    fetchNextPage: fetchSellOrdersNextPage,
+    hasNextPage: isSellOrdersHasNextPage,
+    isLoading: isLoadingSellOrders, 
+    isFetchingNextPage: isFetchingSellOrdersNextPage
+  } = useInfiniteQuery({
+    queryKey:['sell-orders-pages'],
+    queryFn: ({signal, pageParam})=> getSellOrdersInPages({signal, nextCursor: pageParam}),
+    initialPageParam: null,
+    getNextPageParam:(lastPage) => lastPage.cursor
   })
 
-  function onDownloadPDF(){
-    console.log('download pdf ')
-    const {signal} = new AbortController();
-    downloadPDF({signal});
+  const { mutate: downloadPDF, isPending: isDownloadingPDF } = useMutation({
+    mutationKey: ["download-orders"],
+    mutationFn: downloadOrdersAsPdf,
+    onSuccess: () => toast.success("Orders pdf downloaded successfully"),
+    onError: () => toast.error("Error !"),
+  });
+
+  function onDownloadPDF() {
+    const { signal } = new AbortController();
+    downloadPDF({ signal });
   }
   return (
     <div className="w-full px-8 py-4 font-sans bg-gray-100 min-h-screen">
@@ -31,18 +58,31 @@ const StocksOrders = () => {
           onClick={onDownloadPDF}
           className="text-blue-600 hover:underline text-sm font-medium cursor-pointer"
         >
-          {isDownloadingPDF? 'Downloading...':'Download as PDF'}
+          {isDownloadingPDF ? "Downloading..." : "Download as PDF"}
         </button>
       </div>
 
       {/* Full-width 2-column Grid */}
       <main className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <BuyOrders buyOrders={allOrders?.buyOrders} isLoading={isLoadingOrders}/>
-        <SellOrders sellOrders={allOrders?.sellOrders} isLoading={isLoadingOrders}  />
+
+        <BuyOrders
+          pages={buyOrdersData?.pages}
+          isLoading={isLoadingBuyOrders}
+          fetchNextPage={fetchBuyOrdersNextPage}
+          hasNextPage={isBuyOrdersHasNextPage}
+          isLoadingNextPage={isFetchingNextPage}
+        />
+
+        <SellOrders
+          pages= {sellOrdersData?.pages}
+          isLoading={isLoadingSellOrders}
+          fetchNextPage={fetchSellOrdersNextPage}
+          hasNextPage={isSellOrdersHasNextPage}
+          isLoadingNextPage= {isFetchingSellOrdersNextPage}
+        />
       </main>
     </div>
+  );
+};
 
-  )
-}
-
-export default StocksOrders
+export default StocksOrders;

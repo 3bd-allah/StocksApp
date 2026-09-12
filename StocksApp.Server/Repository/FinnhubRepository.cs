@@ -5,7 +5,7 @@ using StocksApp.Server.IRepository;
 using StocksApp.Server.Options;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-
+using StocksApp.Server.Application.Common;
 namespace StocksApp.Server.Repository
 {
     public class FinnhubRepository : IFinnhubRepository
@@ -49,15 +49,15 @@ namespace StocksApp.Server.Repository
             _logger.LogInformation("GetCompanyProfileAsync form FinnhubRepository");
             _logger.LogInformation("Token: {@Token}", Token);
             string link = $"https://finnhub.io/api/v1/stock/profile2?symbol={stockSymbol}&token={Token}";
-            return await GetFrom<TradeCompanyProfile>(link);
+            var result = await GetFrom<TradeCompanyProfile>(link);
+            return result.IsSuccess ? result : null!;
         }
 
-        public async Task<Dictionary<string, object>?> GetStockPriceQuoteAsync(string stockSymbol)
+        public async Task<Dictionary<string, object>> GetStockPriceQuoteAsync(string stockSymbol)
         {
             _logger.LogInformation("GetStockPriceQuoteAsync form FinnhubRepository");
-
             string link = $"https://finnhub.io/api/v1/quote?symbol={stockSymbol}&token={Token}";
-            return await GetFrom<Dictionary<string, object>>(link);
+            return await GetFrom<Dictionary<string,object>>(link);
         }
 
         public async Task<List<Stock>?> GetAllStocksAsync()

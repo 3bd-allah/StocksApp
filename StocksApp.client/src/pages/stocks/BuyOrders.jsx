@@ -1,7 +1,18 @@
-import OrderList from "./OrderList"
+import OrderList from "./OrderList";
 
-const BuyOrders = ({buyOrders = [], isLoading}) => {
-  return <OrderList title={"Buy Orders"} orders={buyOrders} isLoading={isLoading} />
-}
+const BuyOrders = ({ pages, isLoading, fetchNextPage, hasNextPage, isLoadingNextPage }) => {
+  return (
+    <>
+      <OrderList
+        pages={pages}
+        title={"Buy Orders"}
+        isLoading={isLoading}
+        hasNextPage={hasNextPage}
+        onLoadMore={fetchNextPage}
+        isLoadingNextPage={isLoadingNextPage}
+      />
+    </>
+  );
+};
 
-export default BuyOrders
+export default BuyOrders;

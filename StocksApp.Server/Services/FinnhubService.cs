@@ -4,7 +4,7 @@ using StocksApp.Server.DTOs;
 using StocksApp.Server.IRepository;
 using StocksApp.Server.Options;
 using StocksApp.Server.Services.Contracts;
-using System.Text.Json;
+using StocksApp.Server.Exceptions;
 
 namespace StocksApp.Server.Services
 {
@@ -28,14 +28,17 @@ namespace StocksApp.Server.Services
         {
             _logger.LogInformation("GetCompanyProfileAsync form FinnhubService");
             _logger.LogDebug("Symbol of Company: {symbol}", symbol);
-            return await _finnhubRepository.GetCompanyProfileAsync(symbol);
+            var result = await _finnhubRepository.GetCompanyProfileAsync(symbol);
+            return result;
+            //return result.IsSuccess ? result.Value : null! ;
         }
 
         public async Task<Dictionary<string, object>?> GetStockPriceQuote(string symbol)
         {
             _logger.LogInformation("GetStockPriceQuoteAsync form FinnhubService");
-            
-            return await _finnhubRepository.GetStockPriceQuoteAsync(symbol); 
+            var result = await _finnhubRepository.GetStockPriceQuoteAsync(symbol);
+            return result;
+            //return result.IsSuccess ? result.Value : null! ;
         }
 
         public async Task<List<Stock>> GetAllPopularStocks()

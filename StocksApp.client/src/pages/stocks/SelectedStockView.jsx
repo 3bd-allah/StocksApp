@@ -3,15 +3,16 @@ import { useNavigate } from "react-router";
 const SelectedStockView = ({ stock }) => {
   const navigate = useNavigate();
   const currentStock = stock ;
-
   function handleOnTrade(){
     navigate('/stocks/trade', {
       state: currentStock
     })
   }
-
-  return (
-    <div className="w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[450px]">
+  let content;
+  if(currentStock.message){
+    content = <h3 className="font-bold text-red-300">{currentStock.message}</h3>
+  }else{
+    content = <div className="w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[450px]">
       <div>
         {/* Company Logo Container */}
         <div className="w-32 h-32 bg-black rounded-lg flex items-center justify-center p-4 mb-4">
@@ -45,7 +46,7 @@ const SelectedStockView = ({ stock }) => {
         {/* Stock Price Display */}
         <div className="text-5xl font-bold text-gray-900 tracking-tight flex items-baseline gap-1">
           <span className="text-gray-400 font-normal">$</span>
-          <span>{currentStock.price.toFixed(2)}</span>
+          <span>{currentStock.price?.toFixed(2)}</span>
         </div>
       </div>
 
@@ -59,7 +60,8 @@ const SelectedStockView = ({ stock }) => {
         </button>
       </div>
     </div>
-  );
+  }
+  return content;
 };
 
 export default SelectedStockView;
