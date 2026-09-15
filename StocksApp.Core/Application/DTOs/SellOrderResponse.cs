@@ -1,0 +1,45 @@
+﻿using StocksApp.Core.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
+
+namespace StocksApp.Core.Application.DTOs
+{
+    public record SellOrderResponse
+    {
+        public Guid SellOrderID { get; set; }
+
+        [Required(ErrorMessage = "Stock symbol is required.")]
+        public string? StockSymbol { get; set; }
+
+        [Required(ErrorMessage = "Stock name is required.")]
+        public string? StockName { get; set; }
+
+        public DateTime DateAndTimeOfOrder { get; set; }
+
+
+        [Range(1, 100000, ErrorMessage = "Quantity must be between 1 and 100,000.")]
+        public uint Quantity { get; set; }
+
+
+        [Range(1d, 10000d, ErrorMessage = "Price must be between 1 and 10,000.")]
+        public double? Price { get; set; }
+
+        public double TradeAmount { get; set; }
+
+    }
+    public static class SellOrderExtenstions
+    {
+        public static SellOrderResponse ToSellOrderResponse(this SellOrder sellOrder)
+        {
+            return new SellOrderResponse
+            {
+                SellOrderID = sellOrder.SellOrderID,
+                StockName = sellOrder.StockName,
+                StockSymbol = sellOrder.StockSymbol,
+                Quantity = sellOrder.Quantity,
+                Price = sellOrder.Price,
+                DateAndTimeOfOrder = sellOrder.DateAndTimeOfOrder,
+                TradeAmount = Convert.ToDouble(sellOrder.Quantity * sellOrder.Price)
+            };
+        }
+    }
+}

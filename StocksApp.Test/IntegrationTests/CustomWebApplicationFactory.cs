@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.Extensions.DependencyInjection;
-using StocksApp.Server;
+using StocksApp.Core;
 using StocksApp.Server.AppDbContext;
 using System;
 using System.Collections.Generic;

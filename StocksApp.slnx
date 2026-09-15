@@ -1,4 +1,8 @@
 <Solution>
-  <Project Path="StocksApp.Server/StocksApp.Server.csproj" />
-  <Project Path="StocksApp.Test/StocksApp.Test.csproj" Id="de94bb8a-b2db-44d4-becd-649fdf6269c5" />
+  <Folder Name="/src/">
+    <Project Path="H:/Udemy/AspNetCoreUltimateGuide/StocksApp/StocksApp.Core/StocksApp.Core.csproj" Id="a01b63a4-a587-42ba-9cdc-06f1dd336349" />
+    <Project Path="H:/Udemy/AspNetCoreUltimateGuide/StocksApp/StocksApp.Infrastructure/StocksApp.Infrastructure.csproj" Id="81556bb6-213e-442b-84c7-c7167d78e606" />
+    <Project Path="H:/Udemy/AspNetCoreUltimateGuide/StocksApp/StocksApp.Presentation/StocksApp.Presentation.csproj" Id="596c5847-ed32-4cb5-be87-d96b3e1b4613" />
+  </Folder>
+  <Project Path="H:/Udemy/AspNetCoreUltimateGuide/StocksApp/StocksApp.Test/StocksApp.Test.csproj" Id="de94bb8a-b2db-44d4-becd-649fdf6269c5" />
 </Solution>

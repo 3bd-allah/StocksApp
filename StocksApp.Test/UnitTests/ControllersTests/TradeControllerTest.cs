@@ -3,15 +3,11 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Moq;
+using StocksApp.Core.Application.DTOs;
+using StocksApp.Core.ServiceContracts;
+
+using StocksApp.Core.Application.Common.Options;
 using StocksApp.Server.Controllers;
-using StocksApp.Server.DTOs;
-using StocksApp.Server.Options;
-using StocksApp.Server.Services.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Net;
-using System.Text;
 
 namespace StocksApp.Test.UnitTests.ControllersTests
 {

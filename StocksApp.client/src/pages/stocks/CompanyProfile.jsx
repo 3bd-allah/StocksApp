@@ -5,7 +5,7 @@ import { createSellOrder, createBuyOrder } from "../../api/stocks";
 import toast from "react-hot-toast";
 
 const CompanyProfile = () => {
-  const [quantity, setQuantity] = useState();
+  const [quantity, setQuantity] = useState(100);
   const location = useLocation();
   const navigate = useNavigate();
   const company = location.state;
@@ -45,7 +45,7 @@ const CompanyProfile = () => {
   console.log(sellOrderResponse);
 
   function handleBuy(stockData) {
-    console.log("from buy handler");
+    console.log("from buy handler", quantity);
     const buyOrderData = {
       stockSymbol: stockData.stockSymbol,
       stockName: stockData.stockName,

@@ -1,11 +1,11 @@
 ﻿using AutoFixture;
 using FluentAssertions;
-using StocksApp.Server.DTOs;
-using StocksApp.Server.IRepository;
-using StocksApp.Server.Services;
+using StocksApp.Core.Application.DTOs;
 using Moq;
-using StocksApp.Server.Entities;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using StocksApp.Core.Application.Services;
+using StocksApp.Core.Domain.IRepository;
+using StocksApp.Core.Domain.Entities;
 namespace StocksApp.Test.UnitTests.ServicesTests
 {
     public class StockServiceTest 

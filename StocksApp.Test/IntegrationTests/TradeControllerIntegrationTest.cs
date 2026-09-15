@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using StocksApp.Server.DTOs;
+using StocksApp.Core.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Net;
